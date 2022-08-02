@@ -1,0 +1,134 @@
+import json
+from logging import Logger
+from pathlib import Path
+from typing import List
+
+import matplotlib.pyplot as plt
+import networkx as nx
+from matplotlib.figure import Figure
+from networkx import Graph
+
+from ..nodes.config_vis_networkx import ConfigVisNetworkX
+from ..nodes.matplotlib_vis_networkx import (
+    dict_ntype_list_nid_to_dict_nid_colour,
+    g_to_dict_ntype_list_nid,
+    layout_and_g_to_pos,
+)
+
+
+def _matplotlib_vis_networkx_pipeline(  # type: ignore[no-any-unimported]
+    nx_g: Graph, config_vis_networkx: ConfigVisNetworkX, logger: Logger
+) -> Figure:
+    plt.set_loglevel("error")
+
+    if nx_g.is_multigraph:
+        logger.error(
+            f"{nx_g} is multigraph which is not supported. "
+            "converting multigraph to graph"
+        )
+        nx_g = Graph(nx_g)
+        logger.info(f"Converted graph has {nx_g.number_of_edges()} edges")
+
+    logger.info(
+        f"Using {config_vis_networkx.layout} layout " "to plot matplotlib graph"
+    )
+
+    # Prepare interim data structures before generating drawing specific variables
+    dict_ntype_list_nid = g_to_dict_ntype_list_nid(
+        g=nx_g, nfeat_ntype=config_vis_networkx.nfeat_ntype, logger=logger
+    )
+    dict_nid_colour = dict_ntype_list_nid_to_dict_nid_colour(
+        dict_ntype_list_nid=dict_ntype_list_nid, logger=logger
+    )
+
+    # Parse data structures used to generate drawing
+    pos = layout_and_g_to_pos(
+        g=nx_g, vis_networkx_layout=config_vis_networkx.layout, logger=logger
+    )
+    node_labels = nx.get_node_attributes(G=nx_g, name=config_vis_networkx.nfeat_ntype)
+    edge_labels = nx.get_edge_attributes(G=nx_g, name=config_vis_networkx.nfeat_etype)
+    list_colour: List[str] = [dict_nid_colour[nid] for nid in list(nx_g.nodes)]
+
+    # Initiate a matplotlib Figure object
+    fig = plt.figure(figsize=config_vis_networkx.figsize, dpi=config_vis_networkx.dpi)
+    ax = fig.add_subplot(111)
+
+    # Plot respective objects based on data structures parsed
+    nx.draw_networkx_nodes(
+        G=nx_g,
+        pos=pos,
+        ax=ax,
+        node_color=list_colour,
+        label="This is where legend should be",
+    )
+    nx.draw_networkx_labels(
+        G=nx_g,
+        pos=pos,
+        labels=node_labels,
+        font_size=config_vis_networkx.node_label_font_size,
+    )
+    nx.draw_networkx_edges(G=nx_g, pos=pos, ax=ax, label="This is edge legend")
+    nx.draw_networkx_edge_labels(
+        G=nx_g,
+        pos=pos,
+        ax=ax,
+        edge_labels=edge_labels,
+        font_size=config_vis_networkx.edge_label_font_size,
+    )
+
+    return fig
+
+
+def matplotlib_vis_networkx_pipeline(
+    path_nx_g: Path, path_vis_nx_g: Path, logger: Logger
+) -> None:
+    # Data Access - Input
+    with open(path_nx_g, "r") as f:
+        data = json.load(f)
+        nx_g = nx.node_link_graph(data)
+
+    config_vis_networkx = ConfigVisNetworkX()  # Use Default setting
+
+    logger.info(f"Loaded a networkx graph from {path_nx_g}")
+
+    # Task Processing
+    fig = _matplotlib_vis_networkx_pipeline(
+        nx_g=nx_g, config_vis_networkx=config_vis_networkx, logger=logger
+    )
+
+    # Data Acess - Output
+    fig.savefig(path_vis_nx_g)
+
+    logger.info(f"Exported visualisation of {nx_g} to {path_vis_nx_g}")
+
+
+if __name__ == "__main__":
+    import argparse
+
+    from ..nodes.base_logger import get_base_logger
+
+    logger = get_base_logger()
+
+    parser = argparse.ArgumentParser(
+        description="Plot a networkx graph visualisation and save it to a path"
+    )
+    parser.add_argument(
+        "-png",
+        "--path_nx_g",
+        type=Path,
+        required=True,
+        help="Path to a networkx graph json object",
+    )
+    parser.add_argument(
+        "-pvng",
+        "--path_vis_nx_g",
+        type=Path,
+        required=True,
+        help="Path to a png format networkx graph visualisation",
+    )
+
+    args = parser.parse_args()
+
+    matplotlib_vis_networkx_pipeline(
+        path_nx_g=args.path_nx_g, path_vis_nx_g=args.path_vis_nx_g, logger=logger
+    )
