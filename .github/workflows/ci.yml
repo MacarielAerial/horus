@@ -16,6 +16,9 @@ jobs:
 
       - name: Lint and Test code
         run: |
+          apt-get install software-properties-common
+          add-apt-repository universe
+          apt update
           apt install python-pydot python-pydot-ng graphviz 
           curl -sSL https://install.python-poetry.org | python3 - --preview
           export PATH="/github/home/.local/bin:$PATH"
