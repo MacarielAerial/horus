@@ -97,6 +97,13 @@ def matplotlib_vis_networkx_pipeline(
     )
 
     # Data Acess - Output
+    if not path_vis_nx_g.parent.exists():
+        path_vis_nx_g.parent.mkdir(parents=True, exist_ok=True)
+        logger.info(
+            f"Parent directory of {path_vis_nx_g} does not exist. "
+            f"Creating directory tree to {path_vis_nx_g.parent}"
+        )
+
     fig.savefig(path_vis_nx_g)
 
     logger.info(f"Exported visualisation of {nx_g} to {path_vis_nx_g}")
