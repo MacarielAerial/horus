@@ -8,9 +8,10 @@ import networkx as nx
 from matplotlib.figure import Figure
 from networkx import Graph
 
-from ..nodes.config_vis_networkx import ConfigVisNetworkX
+from ..nodes.config_vis_networkx import ConfigVisNetworkX, VisNetworkXLayout
 from ..nodes.matplotlib_vis_networkx import (
     dict_ntype_list_nid_to_dict_nid_colour,
+    double_quote_double_colon_edge_attrs,
     g_to_dict_ntype_list_nid,
     layout_and_g_to_pos,
 )
@@ -28,6 +29,14 @@ def _matplotlib_vis_networkx_pipeline(  # type: ignore[no-any-unimported]
         )
         nx_g = Graph(nx_g)
         logger.info(f"Converted graph has {nx_g.number_of_edges()} edges")
+
+    if config_vis_networkx.layout is VisNetworkXLayout.graphviz_layout:
+        logger.info(
+            f"Layout is chosen to be {config_vis_networkx.layout} "
+            "which necessitates edge feature double colon check "
+            "and alterations"
+        )
+        nx_g = double_quote_double_colon_edge_attrs(g=nx_g, logger=logger)
 
     logger.info(
         f"Using {config_vis_networkx.layout} layout " "to plot matplotlib graph"

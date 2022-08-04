@@ -9,6 +9,7 @@ from dataclasses_json import dataclass_json
 
 class VisNetworkXLayout(Enum):
     spring_layout: str = "spring_layout"
+    graphviz_layout: str = "graphviz_layout"
 
 
 class HexColourCode(Enum):
@@ -24,7 +25,7 @@ class HexColourCode(Enum):
 class ConfigVisNetworkX:
     nfeat_ntype: str = "ntype"
     nfeat_etype: str = "etype"
-    layout: VisNetworkXLayout = VisNetworkXLayout.spring_layout
+    layout: VisNetworkXLayout = VisNetworkXLayout.graphviz_layout
     node_size: int = 200  # netowkrx library's default is 300
     node_label_font_size: int = 8  # networkx library's default is 12
     edge_label_font_size: int = 4  # networkx library's default is 12

@@ -4,6 +4,7 @@ from pprint import pformat
 from typing import Dict, List
 
 from networkx import Graph, spring_layout
+from networkx.drawing.nx_pydot import graphviz_layout
 from numpy import ndarray
 
 from .config_vis_networkx import HexColourCode, VisNetworkXLayout
@@ -12,8 +13,10 @@ from .config_vis_networkx import HexColourCode, VisNetworkXLayout
 def layout_and_g_to_pos(  # type: ignore[no-any-unimported]
     vis_networkx_layout: VisNetworkXLayout, g: Graph, logger: Logger
 ) -> Dict[int, ndarray]:
-    if vis_networkx_layout == VisNetworkXLayout.spring_layout:
+    if vis_networkx_layout is VisNetworkXLayout.spring_layout:
         pos: Dict[int, ndarray] = spring_layout(g)
+    elif vis_networkx_layout is VisNetworkXLayout.graphviz_layout:
+        pos = graphviz_layout(g)
     else:
         raise NotImplementedError(
             f"{vis_networkx_layout} is not implemented for visualisation"
@@ -88,3 +91,25 @@ def dict_ntype_list_nid_to_dict_nid_colour(
     logger.debug(f"Assigned HEX colour code to {len(dict_nid_colour)} nodes")
 
     return dict_nid_colour
+
+
+def double_quote_double_colon_edge_attrs(  # type: ignore[no-any-unimported]
+    g: Graph, logger: Logger
+) -> Graph:
+    n_double_colon_edges: int = 0
+
+    for src, dst, attrs in g.edges.data():
+        has_double_colon: bool = False
+        for k, v in attrs.items():
+            if isinstance(v, str) and ":" in v:
+                g.edges[src, dst][k] = '"{}"'.format(v)
+                has_double_colon = True
+        if has_double_colon:
+            n_double_colon_edges += 1
+
+    logger.debug(
+        f"{n_double_colon_edges} edges have double colons "
+        "and are therefore double quoted"
+    )
+
+    return g

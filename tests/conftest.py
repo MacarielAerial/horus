@@ -45,3 +45,7 @@ class TestFixture:
     @property
     def path_matplotlib_vis_networkx(self) -> Path:
         return self.path_dir_data_output / "matplotlib_vis_networkx.png"
+
+    @property
+    def path_pygraphviz_vis_networkx(self) -> Path:
+        return self.path_dir_data_output / "pygraphviz_networkx.png"
