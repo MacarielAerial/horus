@@ -19,7 +19,6 @@ jobs:
 
       - name: Lint and Test code
         run: |
-          sudo apt-get -y update
           sudo apt-get install software-properties-common
           sudo add-apt-repository universe
           sudo apt install python-pydot python-pydot-ng graphviz 
