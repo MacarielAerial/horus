@@ -17,12 +17,15 @@ jobs:
       - name: Install sudo package
         run: apt update && apt install sudo
 
-      - name: Lint and Test code
+      - name: Install graphviz system dependency
         run: |
           sudo apt-get update
           sed -i "/^# deb.*universe/ s/^# //" /etc/apt/sources.list
           sudo apt-get install -y software-properties-common
           sudo apt-get install -y graphviz graphviz-dev
+
+      - name: Lint and Test code
+        run: |
           curl -sSL https://install.python-poetry.org | python3 - --preview
           export PATH="/github/home/.local/bin:$PATH"
           poetry --version
