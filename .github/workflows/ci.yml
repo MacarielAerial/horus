@@ -19,7 +19,6 @@ jobs:
 
       - name: Lint and Test code
         run: |
-          sudo apt-get update
           sed -i "/^# deb.*universe/ s/^# //" /etc/apt/sources.list
           sudo apt-get install -y software-properties-common
           sudo apt install -y python-pydot python-pydot-ng graphviz 
