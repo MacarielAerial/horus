@@ -16,6 +16,8 @@ jobs:
 
       - name: Lint and Test code
         run: |
+          add-apt-repository universe
+          apt update
           apt-get install graphviz graphviz-dev
           curl -sSL https://install.python-poetry.org | python3 - --preview
           export PATH="/github/home/.local/bin:$PATH"
