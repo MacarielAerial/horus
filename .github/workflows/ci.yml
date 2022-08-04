@@ -9,10 +9,14 @@ jobs:
     container:
       image: python:3.9
     runs-on: ubuntu-latest
+    shell: bash
 
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+
+      - name: Install sudo package
+        run: apt install sudo
 
       - name: Lint and Test code
         run: |
