@@ -15,11 +15,10 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Install sudo package
-        run: apt install sudo
+        run: apt update & apt install sudo
 
       - name: Lint and Test code
         run: |
-          sudo apt update
           sudo apt-get install software-properties-common
           sudo add-apt-repository universe
           sudo apt install python-pydot python-pydot-ng graphviz 
