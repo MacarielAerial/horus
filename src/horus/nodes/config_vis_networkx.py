@@ -26,8 +26,9 @@ class ConfigVisNetworkX:
     nfeat_ntype: str = "ntype"
     nfeat_etype: str = "etype"
     layout: VisNetworkXLayout = VisNetworkXLayout.graphviz_layout
-    node_size: int = 200  # netowkrx library's default is 300
-    node_label_font_size: int = 8  # networkx library's default is 12
-    edge_label_font_size: int = 4  # networkx library's default is 12
-    figsize: Tuple[int, int] = (24, 24)  # This is already quite large
+    node_size: int = 4000  # netowkrx library's default is 300
+    node_label_font_size: int = 6  # networkx library's default is 12
+    edge_label_font_size: int = 6  # networkx library's default is 12
+    figsize: Tuple[int, int] = (32, 32)  # This is already quite large
     dpi: int = 500  # High fidelity setting
+    scale: float = 1  # Default is 1

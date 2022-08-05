@@ -6,7 +6,7 @@ from typing import List
 import matplotlib.pyplot as plt
 import networkx as nx
 from matplotlib.figure import Figure
-from networkx import Graph
+from networkx import DiGraph, Graph
 
 from ..nodes.config_vis_networkx import ConfigVisNetworkX, VisNetworkXLayout
 from ..nodes.matplotlib_vis_networkx import (
@@ -27,7 +27,7 @@ def _matplotlib_vis_networkx_pipeline(  # type: ignore[no-any-unimported]
             f"{nx_g} is multigraph which is not supported. "
             "converting multigraph to graph"
         )
-        nx_g = Graph(nx_g)
+        nx_g = DiGraph(nx_g)
         logger.info(f"Converted graph has {nx_g.number_of_edges()} edges")
 
     if config_vis_networkx.layout is VisNetworkXLayout.graphviz_layout:
@@ -54,6 +54,7 @@ def _matplotlib_vis_networkx_pipeline(  # type: ignore[no-any-unimported]
     pos = layout_and_g_to_pos(
         g=nx_g, vis_networkx_layout=config_vis_networkx.layout, logger=logger
     )
+    pos = nx.rescale_layout_dict(pos=pos, scale=config_vis_networkx.scale)
     node_labels = nx.get_node_attributes(G=nx_g, name=config_vis_networkx.nfeat_ntype)
     edge_labels = nx.get_edge_attributes(G=nx_g, name=config_vis_networkx.nfeat_etype)
     list_colour: List[str] = [dict_nid_colour[nid] for nid in list(nx_g.nodes)]
@@ -68,6 +69,7 @@ def _matplotlib_vis_networkx_pipeline(  # type: ignore[no-any-unimported]
         pos=pos,
         ax=ax,
         node_color=list_colour,
+        node_size=config_vis_networkx.node_size,
         label="This is where legend should be",
     )
     nx.draw_networkx_labels(
