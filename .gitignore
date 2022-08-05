@@ -156,3 +156,4 @@ cython_debug/
 
 # Custom
 tests/data/output
+/data/
