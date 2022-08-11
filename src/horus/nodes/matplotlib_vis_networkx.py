@@ -100,9 +100,12 @@ def double_quote_double_colon_edge_attrs(  # type: ignore[no-any-unimported]
 
     for src, dst, val in g.edges.data(efeat):
         has_double_colon: bool = False
-        if isinstance(val, str) and ":" in val:
-            g.edges[src, dst][efeat] = '"{}"'.format(val)
-            has_double_colon = True
+        if isinstance(val, str):
+            if ":" in val:
+                g.edges[src, dst][efeat] = '"{}"'.format(val)
+                has_double_colon = True
+            else:
+                continue
         else:
             raise TypeError(f"Edge attribute key {efeat} is not of type string")
         if has_double_colon:
@@ -123,9 +126,12 @@ def double_quote_double_colon_node_attrs(  # type: ignore[no-any-unimported]
 
     for nid, val in g.nodes.data(nfeat):
         has_double_colon: bool = False
-        if isinstance(val, str) and ":" in val:
-            g.nodes[nid][nfeat] = '"{}"'.format(val)
-            has_double_colon = True
+        if isinstance(val, str):
+            if ":" in val:
+                g.nodes[nid][nfeat] = '"{}"'.format(val)
+                has_double_colon = True
+            else:
+                continue
         if has_double_colon:
             n_double_colon_nodes += 1
 
