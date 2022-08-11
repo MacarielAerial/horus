@@ -12,6 +12,7 @@ from ..nodes.config_vis_networkx import ConfigVisNetworkX, VisNetworkXLayout
 from ..nodes.matplotlib_vis_networkx import (
     dict_ntype_list_nid_to_dict_nid_colour,
     double_quote_double_colon_edge_attrs,
+    double_quote_double_colon_node_attrs,
     g_to_dict_ntype_list_nid,
     layout_and_g_to_pos,
 )
@@ -36,7 +37,12 @@ def _matplotlib_vis_networkx_pipeline(  # type: ignore[no-any-unimported]
             "which necessitates edge feature double colon check "
             "and alterations"
         )
-        nx_g = double_quote_double_colon_edge_attrs(g=nx_g, logger=logger)
+        nx_g = double_quote_double_colon_edge_attrs(
+            g=nx_g, efeat=config_vis_networkx.nfeat_etype, logger=logger
+        )
+        nx_g = double_quote_double_colon_node_attrs(
+            g=nx_g, nfeat=config_vis_networkx.nfeat_ntype, logger=logger
+        )
 
     logger.info(
         f"Using {config_vis_networkx.layout} layout " "to plot matplotlib graph"

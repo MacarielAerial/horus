@@ -94,21 +94,43 @@ def dict_ntype_list_nid_to_dict_nid_colour(
 
 
 def double_quote_double_colon_edge_attrs(  # type: ignore[no-any-unimported]
-    g: Graph, logger: Logger
+    g: Graph, efeat: str, logger: Logger
 ) -> Graph:
     n_double_colon_edges: int = 0
 
-    for src, dst, attrs in g.edges.data():
+    for src, dst, val in g.edges.data(efeat):
         has_double_colon: bool = False
-        for k, v in attrs.items():
-            if isinstance(v, str) and ":" in v:
-                g.edges[src, dst][k] = '"{}"'.format(v)
-                has_double_colon = True
+        if isinstance(val, str) and ":" in val:
+            g.edges[src, dst][efeat] = '"{}"'.format(val)
+            has_double_colon = True
+        else:
+            raise TypeError(f"Edge attribute key {efeat} is not of type string")
         if has_double_colon:
             n_double_colon_edges += 1
 
     logger.debug(
-        f"{n_double_colon_edges} edges have double colons "
+        f"{n_double_colon_edges} edges' {efeat} attribute have double colons "
+        "and are therefore double quoted"
+    )
+
+    return g
+
+
+def double_quote_double_colon_node_attrs(  # type: ignore[no-any-unimported]
+    g: Graph, nfeat: str, logger: Logger
+) -> Graph:
+    n_double_colon_nodes: int = 0
+
+    for nid, val in g.nodes.data(nfeat):
+        has_double_colon: bool = False
+        if isinstance(val, str) and ":" in val:
+            g.nodes[nid][nfeat] = '"{}"'.format(val)
+            has_double_colon = True
+        if has_double_colon:
+            n_double_colon_nodes += 1
+
+    logger.debug(
+        f"{n_double_colon_nodes} nodes' {nfeat} attribute have double colons "
         "and are therefore double quoted"
     )
 
