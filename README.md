@@ -11,5 +11,5 @@ poetry run python -m src.horus.pipelines.matplotlib_vis_networkx_pipeline -png t
 ### Plot a networkx with pygraphviz
 
 ```console
-poetry run python -m src.horus.pipelines.pygraphviz_networkx_pipeline -png data/01_raw/len_2_sequence_labelled_intermediate_graph.json -pvng data/02_intermediate/pygraphviz_networkx.png
+poetry run python -m src.horus.pipelines.pygraphviz_networkx_pipeline -png data/01_raw/len_2_sequence_labelled_intermediate_graph.json -pvng data/02_intermediate/pygraphviz_networkx.png --edge-label
 ```

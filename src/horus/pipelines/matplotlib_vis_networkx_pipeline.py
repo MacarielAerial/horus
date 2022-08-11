@@ -91,13 +91,12 @@ def _matplotlib_vis_networkx_pipeline(  # type: ignore[no-any-unimported]
         node_size=config_vis_networkx.node_size,
         label="This is where legend should be",
     )
-    if config_vis_networkx.with_edge_label:
-        nx.draw_networkx_labels(
-            G=nx_g,
-            pos=pos,
-            labels=node_labels,
-            font_size=config_vis_networkx.node_label_font_size,
-        )
+    nx.draw_networkx_labels(
+        G=nx_g,
+        pos=pos,
+        labels=node_labels,
+        font_size=config_vis_networkx.node_label_font_size,
+    )
     nx.draw_networkx_edges(
         G=nx_g,
         pos=pos,
@@ -107,13 +106,14 @@ def _matplotlib_vis_networkx_pipeline(  # type: ignore[no-any-unimported]
         arrowsize=10 * config_vis_networkx.width,  # 10 is default
         label="This is edge legend",
     )
-    nx.draw_networkx_edge_labels(
-        G=nx_g,
-        pos=pos,
-        ax=ax,
-        edge_labels=edge_labels,
-        font_size=config_vis_networkx.edge_label_font_size,
-    )
+    if config_vis_networkx.with_edge_label:
+        nx.draw_networkx_edge_labels(
+            G=nx_g,
+            pos=pos,
+            ax=ax,
+            edge_labels=edge_labels,
+            font_size=config_vis_networkx.edge_label_font_size,
+        )
 
     return fig
 
@@ -177,17 +177,16 @@ if __name__ == "__main__":
         help="Path to a png format networkx graph visualisation",
     )
     parser.add_argument(
-        "-wel",
-        "--with_edge_label",
-        type=bool,
-        required=False,
+        "--edge-label",
+        action=argparse.BooleanOptionalAction,
         default=True,
+        required=False,
         help="Whether to draw edge labels",
     )
 
     args = parser.parse_args()
 
-    kwargs: Dict[str, Any] = {"with_edge_label": args.with_edge_label}
+    kwargs: Dict[str, Any] = {"with_edge_label": args.edge_label}
 
     matplotlib_vis_networkx_pipeline(
         path_nx_g=args.path_nx_g,

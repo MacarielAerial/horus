@@ -40,6 +40,6 @@ class ConfigVisNetworkX:
     width: float = 0.3  # default line width of edges is 1.0
     node_label_font_size: int = 2  # networkx library's default is 12
     edge_label_font_size: int = 2  # networkx library's default is 12
-    figsize: Tuple[int, int] = (64, 64)  # This is already quite large
+    figsize: Tuple[int, int] = (72, 72)  # This is already quite large
     dpi: int = 500  # High fidelity setting
     scale: float = 1  # Default is 1
