@@ -126,9 +126,13 @@ def matplotlib_vis_networkx_pipeline(
         data = json.load(f)
         nx_g = nx.node_link_graph(data)
 
-    config_vis_networkx = ConfigVisNetworkX(**kwargs)  # Use Default setting
-
     logger.info(f"Loaded a networkx graph from {path_nx_g}")
+
+    config_vis_networkx = ConfigVisNetworkX(**kwargs)
+
+    logger.info(
+        "The visualisation run is configured as followed:\n" f"{config_vis_networkx}"
+    )
 
     # Task Processing
     fig = _matplotlib_vis_networkx_pipeline(

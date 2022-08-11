@@ -36,10 +36,10 @@ class ConfigVisNetworkX:
     efeat_etype: str = "etype"
     with_edge_label: bool = True
     layout: VisNetworkXLayout = VisNetworkXLayout.graphviz_layout
-    node_size: int = 200  # netowkrx library's default is 300
+    node_size: int = 100  # netowkrx library's default is 300
     width: float = 0.3  # default line width of edges is 1.0
-    node_label_font_size: int = 4  # networkx library's default is 12
-    edge_label_font_size: int = 4  # networkx library's default is 12
+    node_label_font_size: int = 2  # networkx library's default is 12
+    edge_label_font_size: int = 2  # networkx library's default is 12
     figsize: Tuple[int, int] = (64, 64)  # This is already quite large
     dpi: int = 500  # High fidelity setting
     scale: float = 1  # Default is 1
