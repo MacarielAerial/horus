@@ -141,3 +141,31 @@ def double_quote_double_colon_node_attrs(  # type: ignore[no-any-unimported]
     )
 
     return g
+
+
+def remove_all_node_attrs_except(  # type: ignore[no-any-unimported]
+    nx_g: Graph, list_nfeat: List[str], logger: Logger
+) -> Graph:
+    logger.info(
+        f"Removing all node attributes except {list_nfeat} from "
+        f"{nx_g.__class__} with {nx_g.number_of_nodes()} nodes"
+    )
+
+    # Initiate a logging variable
+    dict_freq_nfeat_removed: Dict[str, int] = {}
+
+    # Iteratively remove all node attributes unless
+    # they are within the exception list
+    for nid, attrs in nx_g.nodes.data():
+        for k, _ in attrs.items():
+            if k not in list_nfeat:
+                del nx_g.nodes[nid][k]
+                if k not in dict_freq_nfeat_removed.keys():
+                    dict_freq_nfeat_removed[k] = 1
+                else:
+                    dict_freq_nfeat_removed[k] += 1
+
+    logger.info(
+        "The frequency distribution of removed node attributes is:\n"
+        f"{pformat(dict_freq_nfeat_removed)}"
+    )

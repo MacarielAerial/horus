@@ -15,6 +15,7 @@ from ..nodes.matplotlib_vis_networkx import (
     double_quote_double_colon_node_attrs,
     g_to_dict_ntype_list_nid,
     layout_and_g_to_pos,
+    remove_all_node_attrs_except,
 )
 
 
@@ -36,6 +37,9 @@ def _matplotlib_vis_networkx_pipeline(  # type: ignore[no-any-unimported]
             f"Layout is chosen to be {config_vis_networkx.layout} "
             "which necessitates edge feature double colon check "
             "and alterations"
+        )
+        nx_g = remove_all_node_attrs_except(
+            nx_g=nx_g, list_nfeat=[config_vis_networkx.nfeat_ntype], logger=logger
         )
         nx_g = double_quote_double_colon_edge_attrs(
             g=nx_g, efeat=config_vis_networkx.nfeat_etype, logger=logger
