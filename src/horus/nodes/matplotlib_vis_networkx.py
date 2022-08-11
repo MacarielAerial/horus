@@ -157,7 +157,7 @@ def remove_all_node_attrs_except(  # type: ignore[no-any-unimported]
     # Iteratively remove all node attributes unless
     # they are within the exception list
     for nid, attrs in nx_g.nodes.data():
-        for k, _ in attrs.items():
+        for k in list(attrs.keys()):
             if k not in list_nfeat:
                 del nx_g.nodes[nid][k]
                 if k not in dict_freq_nfeat_removed.keys():
@@ -169,3 +169,5 @@ def remove_all_node_attrs_except(  # type: ignore[no-any-unimported]
         "The frequency distribution of removed node attributes is:\n"
         f"{pformat(dict_freq_nfeat_removed)}"
     )
+
+    return nx_g
