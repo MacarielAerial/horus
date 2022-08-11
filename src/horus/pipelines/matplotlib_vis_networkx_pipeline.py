@@ -1,7 +1,7 @@
 import json
 from logging import Logger
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 import matplotlib.pyplot as plt
 import networkx as nx
@@ -10,12 +10,12 @@ from networkx import DiGraph, Graph
 
 from ..nodes.config_vis_networkx import ConfigVisNetworkX, VisNetworkXLayout
 from ..nodes.matplotlib_vis_networkx import (
-    dict_ntype_list_nid_to_dict_nid_colour,
     double_quote_double_colon_edge_attrs,
     double_quote_double_colon_node_attrs,
     layout_and_g_to_pos,
+    list_etype_to_dict_etype_colour,
     list_ntype_to_dict_ntype_colour,
-    nx_g_to_dict_eid_colour,
+    nx_g_to_dict_etype_list_eid,
     nx_g_to_dict_ntype_list_nid,
     remove_all_node_attrs_except,
 )
@@ -52,20 +52,24 @@ def _matplotlib_vis_networkx_pipeline(  # type: ignore[no-any-unimported]
 
     logger.info(f"Using {config_vis_networkx.layout} layout to plot matplotlib graph")
 
+    #
     # Prepare interim data structures before generating drawing specific variables
+    #
+
+    # Node colour
     dict_ntype_list_nid = nx_g_to_dict_ntype_list_nid(
-        g=nx_g, nfeat_ntype=config_vis_networkx.nfeat_ntype, logger=logger
+        nx_g=nx_g, nfeat_ntype=config_vis_networkx.nfeat_ntype, logger=logger
     )
     dict_ntype_colour = list_ntype_to_dict_ntype_colour(
         list_ntype=list(dict_ntype_list_nid.keys()), logger=logger
     )
-    dict_nid_colour = dict_ntype_list_nid_to_dict_nid_colour(
-        dict_ntype_colour=dict_ntype_colour,
-        dict_ntype_list_nid=dict_ntype_list_nid,
-        logger=logger,
-    )
-    dict_eid_colour = nx_g_to_dict_eid_colour(
+
+    # Edge colour
+    dict_etype_list_eid = nx_g_to_dict_etype_list_eid(
         nx_g=nx_g, efeat_etype=config_vis_networkx.efeat_etype, logger=logger
+    )
+    dict_etype_colour = list_etype_to_dict_etype_colour(
+        list_etype=list(dict_etype_list_eid.keys()), logger=logger
     )
 
     # Parse data structures used to generate drawing
@@ -75,37 +79,49 @@ def _matplotlib_vis_networkx_pipeline(  # type: ignore[no-any-unimported]
     pos = nx.rescale_layout_dict(pos=pos, scale=config_vis_networkx.scale)
     node_labels = nx.get_node_attributes(G=nx_g, name=config_vis_networkx.nfeat_ntype)
     edge_labels = nx.get_edge_attributes(G=nx_g, name=config_vis_networkx.efeat_etype)
-    list_node_colour: List[str] = [dict_nid_colour[nid] for nid in list(nx_g.nodes)]
-    list_edge_colour: List[str] = [dict_eid_colour[(u, v)] for u, v in list(nx_g.edges)]
 
     # Initiate a matplotlib Figure object
     fig = plt.figure(figsize=config_vis_networkx.figsize, dpi=config_vis_networkx.dpi)
     ax = fig.add_subplot(111)
 
+    #
     # Plot respective objects based on data structures parsed
-    nx.draw_networkx_nodes(
-        G=nx_g,
-        pos=pos,
-        ax=ax,
-        node_color=list_node_colour,
-        node_size=config_vis_networkx.node_size,
-        label="This is where legend should be",
-    )
+    #
+
+    # Draw nodes of different types
+    for ntype, list_nid in dict_ntype_list_nid.items():
+        nx.draw_networkx_nodes(
+            G=nx_g,
+            pos=pos,
+            ax=ax,
+            nodelist=list_nid,
+            node_color=dict_ntype_colour[ntype].value,
+            node_size=config_vis_networkx.node_size,
+            label=ntype,
+        )
+
+    # Draw labels of nodes of different types
     nx.draw_networkx_labels(
         G=nx_g,
         pos=pos,
         labels=node_labels,
         font_size=config_vis_networkx.node_label_font_size,
     )
-    nx.draw_networkx_edges(
-        G=nx_g,
-        pos=pos,
-        ax=ax,
-        edge_color=list_edge_colour,
-        width=config_vis_networkx.width,
-        arrowsize=10 * config_vis_networkx.width,  # 10 is default
-        label="This is edge legend",
-    )
+
+    # Draw edges of different types
+    for etype, list_eid in dict_etype_list_eid.items():
+        nx.draw_networkx_edges(
+            G=nx_g,
+            pos=pos,
+            ax=ax,
+            edgelist=list_eid,
+            edge_color=dict_etype_colour[etype].value,
+            width=config_vis_networkx.width,
+            arrowsize=10 * config_vis_networkx.width,  # 10 is default
+            label=etype,
+        )
+
+    # Draw labels of edges of different types
     if config_vis_networkx.with_edge_label:
         nx.draw_networkx_edge_labels(
             G=nx_g,
@@ -114,6 +130,9 @@ def _matplotlib_vis_networkx_pipeline(  # type: ignore[no-any-unimported]
             edge_labels=edge_labels,
             font_size=config_vis_networkx.edge_label_font_size,
         )
+
+    # Draw legend
+    plt.legend(scatterpoints=1)
 
     return fig
 

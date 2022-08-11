@@ -31,27 +31,6 @@ def layout_and_g_to_pos(  # type: ignore[no-any-unimported]
     return pos
 
 
-def nx_g_to_dict_ntype_list_nid(  # type: ignore[no-any-unimported]
-    g: Graph, nfeat_ntype: str, logger: Logger
-) -> Dict[str, List[int]]:
-    # Initiate result variable
-    dict_ntype_list_nid: Dict[str, List[int]] = {}
-
-    logger.debug(
-        f"Grouping nodes of {g} by their node type through node attribute "
-        f"{nfeat_ntype}"
-    )
-
-    # Iterate over every node to determine its node type group membership
-    for nid, ntype in g.nodes.data(nfeat_ntype):
-        if ntype not in dict_ntype_list_nid.keys():
-            dict_ntype_list_nid.update({ntype: [nid]})
-        else:
-            dict_ntype_list_nid[ntype].append(nid)
-
-    return dict_ntype_list_nid
-
-
 def count_n_nodes_by_ntype(
     dict_ntype_list_nid: Dict[str, List[int]], logger: Logger
 ) -> Dict[str, int]:
@@ -68,22 +47,51 @@ def count_n_nodes_by_ntype(
     return dict_ntype_n_nodes
 
 
-def dict_ntype_list_nid_to_dict_nid_colour(
-    dict_ntype_colour: Dict[str, HighContrastColourCode],
-    dict_ntype_list_nid: Dict[str, List[int]],
-    logger: Logger,
-) -> Dict[int, str]:
-    # Assign each node of every type a non-unique colour
-    dict_nid_colour: Dict[int, str] = {}
-    for ntype, list_nid in dict_ntype_list_nid.items():
-        for nid in list_nid:
-            colour = dict_ntype_colour[ntype]
-            colour_str: str = colour.value
-            dict_nid_colour.update({nid: colour_str})
+#
+# Node and edge colour derivation
+#
 
-    logger.debug(f"Assigned HEX colour code to {len(dict_nid_colour)} nodes")
 
-    return dict_nid_colour
+def nx_g_to_dict_ntype_list_nid(  # type: ignore[no-any-unimported]
+    nx_g: Graph, nfeat_ntype: str, logger: Logger
+) -> Dict[str, List[int]]:
+    # Initiate result variable
+    dict_ntype_list_nid: Dict[str, List[int]] = {}
+
+    logger.debug(
+        f"Grouping nodes of {nx_g} by their node type through node attribute "
+        f"{nfeat_ntype}"
+    )
+
+    # Iterate over every node to determine its node type group membership
+    for nid, ntype in nx_g.nodes.data(nfeat_ntype):
+        if ntype not in dict_ntype_list_nid.keys():
+            dict_ntype_list_nid.update({ntype: [nid]})
+        else:
+            dict_ntype_list_nid[ntype].append(nid)
+
+    return dict_ntype_list_nid
+
+
+def nx_g_to_dict_etype_list_eid(  # type: ignore[no-any-unimported]
+    nx_g: Graph, efeat_etype: str, logger: Logger
+) -> Dict[str, List[Tuple[int, int]]]:
+    # Initiate result variable
+    dict_etype_list_nid: Dict[str, List[Tuple[int, int]]] = {}
+
+    logger.info(
+        f"Grouping {len(nx_g.edges())} edges based on "
+        f"their edge type attribute {efeat_etype}"
+    )
+
+    # Iterate over edges to populate result variable
+    for u, v, etype in nx_g.edges.data(efeat_etype):
+        if etype not in dict_etype_list_nid.keys():
+            dict_etype_list_nid[etype] = [(u, v)]
+        else:
+            dict_etype_list_nid[etype].append((u, v))
+
+    return dict_etype_list_nid
 
 
 def list_ntype_to_dict_ntype_colour(
@@ -105,20 +113,10 @@ def list_ntype_to_dict_ntype_colour(
     return dict_ntype_colour
 
 
-def nx_g_to_dict_eid_colour(  # type: ignore[no-any-unimported]
-    nx_g: Graph, efeat_etype: str, logger: Logger
-) -> Dict[Tuple[int, int], str]:
-    # Initiate result object
-    # e.g. {(0, 1): "#0141F3"}
-    dict_eid_colour: Dict[Tuple[int, int], str] = {}
-
-    # Gather all edge types
-    list_etype: List[str] = []
-    for _, _, etype in nx_g.edges.data(efeat_etype):
-        if etype not in list_etype:
-            list_etype.append(etype)
-
-    # Assign one colour per edge type
+def list_etype_to_dict_etype_colour(
+    list_etype: List[str], logger: Logger
+) -> Dict[str, RainbowColourCode]:
+    # Randomly assign one colour to each edge type
     list_colour: List[RainbowColourCode] = random.sample(
         list(RainbowColourCode), k=len(list_etype)
     )
@@ -129,15 +127,48 @@ def nx_g_to_dict_eid_colour(  # type: ignore[no-any-unimported]
         f"{pformat(dict_etype_colour)}"
     )
 
-    # Assign one colour (with duplicate) per edge id
-    for u, v, etype in nx_g.edges.data(efeat_etype):
-        colour = dict_etype_colour[etype]
-        colour_str = colour.value
-        dict_eid_colour.update({(u, v): colour_str})
+    return dict_etype_colour
 
-    logger.info(f"Assigned colours to {len(dict_eid_colour)} edges")
+
+def dict_ntype_list_nid_to_dict_nid_colour(
+    dict_ntype_colour: Dict[str, HighContrastColourCode],
+    dict_ntype_list_nid: Dict[str, List[int]],
+    logger: Logger,
+) -> Dict[int, str]:
+    # Assign each node of every type a non-unique colour
+    dict_nid_colour: Dict[int, str] = {}
+    for ntype, list_nid in dict_ntype_list_nid.items():
+        for nid in list_nid:
+            colour = dict_ntype_colour[ntype]
+            colour_str: str = colour.value
+            dict_nid_colour.update({nid: colour_str})
+
+    logger.debug(f"Assigned HEX colour code to {len(dict_nid_colour)} nodes")
+
+    return dict_nid_colour
+
+
+def dict_etype_list_eid_to_dict_eid_colour(
+    dict_etype_colour: Dict[str, RainbowColourCode],
+    dict_etype_list_eid: Dict[str, List[Tuple[int, int]]],
+    logger: Logger,
+) -> Dict[Tuple[int, int], str]:
+    # Assign one colour (with duplicate) per edge id
+    dict_eid_colour: Dict[Tuple[int, int], str] = {}
+    for etype, list_eid in dict_etype_list_eid.items():
+        for eid in list_eid:
+            colour = dict_etype_colour[etype]
+            colour_str = colour.value
+            dict_eid_colour.update({eid: colour_str})
+
+    logger.info(f"Assigned HEX colours to {len(dict_eid_colour)} edges")
 
     return dict_eid_colour
+
+
+#
+# Networkx graph cleaning for visualisation
+#
 
 
 def double_quote_double_colon_edge_attrs(  # type: ignore[no-any-unimported]
