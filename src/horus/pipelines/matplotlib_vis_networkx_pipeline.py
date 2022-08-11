@@ -1,7 +1,7 @@
 import json
 from logging import Logger
 from pathlib import Path
-from typing import List
+from typing import Any, Dict, List
 
 import matplotlib.pyplot as plt
 import networkx as nx
@@ -91,12 +91,13 @@ def _matplotlib_vis_networkx_pipeline(  # type: ignore[no-any-unimported]
         node_size=config_vis_networkx.node_size,
         label="This is where legend should be",
     )
-    nx.draw_networkx_labels(
-        G=nx_g,
-        pos=pos,
-        labels=node_labels,
-        font_size=config_vis_networkx.node_label_font_size,
-    )
+    if config_vis_networkx.with_edge_label:
+        nx.draw_networkx_labels(
+            G=nx_g,
+            pos=pos,
+            labels=node_labels,
+            font_size=config_vis_networkx.node_label_font_size,
+        )
     nx.draw_networkx_edges(
         G=nx_g,
         pos=pos,
@@ -118,14 +119,14 @@ def _matplotlib_vis_networkx_pipeline(  # type: ignore[no-any-unimported]
 
 
 def matplotlib_vis_networkx_pipeline(
-    path_nx_g: Path, path_vis_nx_g: Path, logger: Logger
+    path_nx_g: Path, path_vis_nx_g: Path, logger: Logger, **kwargs: Any
 ) -> None:
     # Data Access - Input
     with open(path_nx_g, "r") as f:
         data = json.load(f)
         nx_g = nx.node_link_graph(data)
 
-    config_vis_networkx = ConfigVisNetworkX()  # Use Default setting
+    config_vis_networkx = ConfigVisNetworkX(**kwargs)  # Use Default setting
 
     logger.info(f"Loaded a networkx graph from {path_nx_g}")
 
@@ -171,9 +172,22 @@ if __name__ == "__main__":
         required=True,
         help="Path to a png format networkx graph visualisation",
     )
+    parser.add_argument(
+        "-wel",
+        "--with_edge_label",
+        type=bool,
+        required=False,
+        default=True,
+        help="Whether to draw edge labels",
+    )
 
     args = parser.parse_args()
 
+    kwargs: Dict[str, Any] = {"with_edge_label": args.with_edge_label}
+
     matplotlib_vis_networkx_pipeline(
-        path_nx_g=args.path_nx_g, path_vis_nx_g=args.path_vis_nx_g, logger=logger
+        path_nx_g=args.path_nx_g,
+        path_vis_nx_g=args.path_vis_nx_g,
+        logger=logger,
+        **kwargs,
     )

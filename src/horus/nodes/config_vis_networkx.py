@@ -34,6 +34,7 @@ class RainbowColourCode(Enum):
 class ConfigVisNetworkX:
     nfeat_ntype: str = "ntype"
     efeat_etype: str = "etype"
+    with_edge_label: bool = True
     layout: VisNetworkXLayout = VisNetworkXLayout.graphviz_layout
     node_size: int = 200  # netowkrx library's default is 300
     width: float = 0.3  # default line width of edges is 1.0
