@@ -1,13 +1,15 @@
 import random
+from enum import Enum
 from logging import Logger
 from pprint import pformat
 from typing import Dict, List, Tuple
 
+import networkx as nx
 from networkx import Graph, spring_layout
-from networkx.drawing.nx_pydot import graphviz_layout
 from numpy import ndarray
 
 from .config_vis_networkx import (
+    ColourPaletteChoice,
     HighContrastColourCode,
     RainbowColourCode,
     VisNetworkXLayout,
@@ -20,7 +22,7 @@ def layout_and_g_to_pos(  # type: ignore[no-any-unimported]
     if vis_networkx_layout is VisNetworkXLayout.spring_layout:
         pos: Dict[int, ndarray] = spring_layout(g)
     elif vis_networkx_layout is VisNetworkXLayout.graphviz_layout:
-        pos = graphviz_layout(g)
+        pos = nx.nx_agraph.pygraphviz_layout(g)
     else:
         raise NotImplementedError(
             f"{vis_networkx_layout} is not implemented for visualisation"
@@ -115,12 +117,22 @@ def list_ntype_to_dict_ntype_colour(
 
 def list_etype_to_dict_etype_colour(
     list_etype: List[str], logger: Logger
-) -> Dict[str, RainbowColourCode]:
-    # Randomly assign one colour to each edge type
-    list_colour: List[RainbowColourCode] = random.sample(
-        list(RainbowColourCode), k=len(list_etype)
+) -> Dict[str, Enum]:
+    # Find the smallest viable colour palette
+    palette_choice = min(
+        palette.value
+        for palette in ColourPaletteChoice
+        if len(palette.value) >= len(list_etype)
     )
-    dict_etype_colour: Dict[str, RainbowColourCode] = dict(zip(list_etype, list_colour))
+
+    logger.info(
+        f"{palette_choice} palette is chosen based on {len(list_etype)} "
+        "types of edges in total"
+    )
+
+    # Randomly assign one colour to each edge type
+    list_colour: List[Enum] = random.sample(list(palette_choice), k=len(list_etype))
+    dict_etype_colour: Dict[str, Enum] = dict(zip(list_etype, list_colour))
 
     logger.info(
         "Assigned colours to each edge type with the following mapping:\n"

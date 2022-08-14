@@ -1,3 +1,4 @@
+import dataclasses
 import json
 from logging import Logger
 from pathlib import Path
@@ -8,7 +9,11 @@ import networkx as nx
 from matplotlib.figure import Figure
 from networkx import DiGraph, Graph
 
-from ..nodes.config_vis_networkx import ConfigVisNetworkX, VisNetworkXLayout
+from ..nodes.config_vis_networkx import (
+    ConfigVisNetworkX,
+    NodeFeatureKeyAsLabel,
+    VisNetworkXLayout,
+)
 from ..nodes.matplotlib_vis_networkx import (
     double_quote_double_colon_edge_attrs,
     double_quote_double_colon_node_attrs,
@@ -41,13 +46,21 @@ def _matplotlib_vis_networkx_pipeline(  # type: ignore[no-any-unimported]
             "and alterations"
         )
         nx_g = remove_all_node_attrs_except(
-            nx_g=nx_g, list_nfeat=[config_vis_networkx.nfeat_ntype], logger=logger
+            nx_g=nx_g,
+            list_nfeat=[
+                config_vis_networkx.nfeat_ntype,
+                config_vis_networkx.nfeat_text,
+            ],
+            logger=logger,
         )
         nx_g = double_quote_double_colon_edge_attrs(
             g=nx_g, efeat=config_vis_networkx.efeat_etype, logger=logger
         )
         nx_g = double_quote_double_colon_node_attrs(
             g=nx_g, nfeat=config_vis_networkx.nfeat_ntype, logger=logger
+        )
+        nx_g = double_quote_double_colon_node_attrs(
+            g=nx_g, nfeat=config_vis_networkx.nfeat_text, logger=logger
         )
 
     logger.info(f"Using {config_vis_networkx.layout} layout to plot matplotlib graph")
@@ -72,12 +85,24 @@ def _matplotlib_vis_networkx_pipeline(  # type: ignore[no-any-unimported]
         list_etype=list(dict_etype_list_eid.keys()), logger=logger
     )
 
-    # Parse data structures used to generate drawing
+    # Layout
     pos = layout_and_g_to_pos(
         g=nx_g, vis_networkx_layout=config_vis_networkx.layout, logger=logger
     )
     pos = nx.rescale_layout_dict(pos=pos, scale=config_vis_networkx.scale)
-    node_labels = nx.get_node_attributes(G=nx_g, name=config_vis_networkx.nfeat_ntype)
+
+    # Labels
+    node_labels = nx.get_node_attributes(
+        G=nx_g, name=config_vis_networkx.nfeat_as_node_label.value
+    )
+    if config_vis_networkx.nfeat_as_node_label is NodeFeatureKeyAsLabel.text:
+        max_seq_len: int = 25
+        logger.info(
+            "Node feature for node labelling set to be "
+            f"{config_vis_networkx.nfeat_as_node_label}. "
+            f"Truncating all characters after {max_seq_len}th characters"
+        )
+        node_labels = {nid: text[:max_seq_len] for nid, text in node_labels.items()}
     edge_labels = nx.get_edge_attributes(G=nx_g, name=config_vis_networkx.efeat_etype)
 
     # Initiate a matplotlib Figure object
@@ -105,6 +130,7 @@ def _matplotlib_vis_networkx_pipeline(  # type: ignore[no-any-unimported]
         G=nx_g,
         pos=pos,
         labels=node_labels,
+        font_family=config_vis_networkx.font_family,
         font_size=config_vis_networkx.node_label_font_size,
     )
 
@@ -128,6 +154,7 @@ def _matplotlib_vis_networkx_pipeline(  # type: ignore[no-any-unimported]
             pos=pos,
             ax=ax,
             edge_labels=edge_labels,
+            font_family=config_vis_networkx.font_family,
             font_size=config_vis_networkx.edge_label_font_size,
         )
 
@@ -147,7 +174,13 @@ def matplotlib_vis_networkx_pipeline(
 
     logger.info(f"Loaded a networkx graph from {path_nx_g}")
 
-    config_vis_networkx = ConfigVisNetworkX(**kwargs)
+    config_vis_networkx = ConfigVisNetworkX.from_nx_g(nx_g=nx_g)
+    if len(kwargs) > 0:
+        logger.info(
+            f"Overwriting default values with the following dictionary:\n" f"{kwargs}"
+        )
+    # Overwrites default with supplied parameters
+    config_vis_networkx = dataclasses.replace(config_vis_networkx, **kwargs)
 
     logger.info(
         "The visualisation run is configured as followed:\n" f"{config_vis_networkx}"
@@ -196,6 +229,14 @@ if __name__ == "__main__":
         help="Path to a png format networkx graph visualisation",
     )
     parser.add_argument(
+        "-nanl",
+        "--nfeat_as_node_label",
+        type=NodeFeatureKeyAsLabel,
+        default=NodeFeatureKeyAsLabel.ntype,
+        required=False,
+        help="Key to access a node feature used as node labels",
+    )
+    parser.add_argument(
         "--edge-label",
         action=argparse.BooleanOptionalAction,
         default=True,
@@ -205,7 +246,10 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    kwargs: Dict[str, Any] = {"with_edge_label": args.edge_label}
+    kwargs: Dict[str, Any] = {
+        "with_edge_label": args.edge_label,
+        "nfeat_as_node_label": args.nfeat_as_node_label,
+    }
 
     matplotlib_vis_networkx_pipeline(
         path_nx_g=args.path_nx_g,

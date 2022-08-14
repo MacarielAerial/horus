@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from logging import Logger
 from pathlib import Path
+from typing import List
 
 import matplotlib.pyplot as plt
 from pytest import fixture
@@ -49,3 +50,28 @@ class TestFixture:
     @property
     def path_pygraphviz_vis_networkx(self) -> Path:
         return self.path_dir_data_output / "pygraphviz_networkx.png"
+
+    @property
+    def example_list_etype(self) -> List[str]:
+        list_etype: List[str] = [
+            "ROOT",
+            "acl",
+            "acomp",
+            "advcl",
+            "advmod",
+            "agent",
+            "amod",
+            "appos",
+            "pobj",
+            "poss",
+            "preconj",
+            "predet",
+            "prep",
+            "prt",
+            "punct",
+            "quantmod",
+            "relcl",
+            "xcomp",
+        ]
+
+        return list_etype
