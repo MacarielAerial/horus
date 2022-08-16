@@ -35,6 +35,8 @@ class ConfigVisNetworkX:
     figsize: Tuple[int, int] = (84, 84)  # This is already quite large
     dpi: int = 500  # High fidelity setting
     scale: float = 1  # Default is 1
+    max_node_lab_len: int = 25
+    null_node_label: str = "NULL"
 
     @classmethod
     def from_nx_g(  # type: ignore[no-any-unimported]

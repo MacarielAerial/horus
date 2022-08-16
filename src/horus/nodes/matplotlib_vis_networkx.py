@@ -2,7 +2,7 @@ import random
 from enum import Enum
 from logging import Logger
 from pprint import pformat
-from typing import Dict, List, Tuple
+from typing import Any, Dict, List, Tuple
 
 import networkx as nx
 from networkx import Graph, spring_layout
@@ -11,6 +11,7 @@ from numpy import ndarray
 from .config_vis_networkx import (
     ColourPaletteChoice,
     HighContrastColourCode,
+    NodeFeatureKeyAsLabel,
     RainbowColourCode,
     VisNetworkXLayout,
 )
@@ -19,6 +20,8 @@ from .config_vis_networkx import (
 def layout_and_g_to_pos(  # type: ignore[no-any-unimported]
     vis_networkx_layout: VisNetworkXLayout, g: Graph, logger: Logger
 ) -> Dict[int, ndarray]:
+    logger.info(f"Generating layout by {vis_networkx_layout}...")
+
     if vis_networkx_layout is VisNetworkXLayout.spring_layout:
         pos: Dict[int, ndarray] = spring_layout(g)
     elif vis_networkx_layout is VisNetworkXLayout.graphviz_layout:
@@ -119,19 +122,22 @@ def list_etype_to_dict_etype_colour(
     list_etype: List[str], logger: Logger
 ) -> Dict[str, Enum]:
     # Find the smallest viable colour palette
-    palette_choice = min(
-        palette.value
-        for palette in ColourPaletteChoice
-        if len(palette.value) >= len(list_etype)
+    palette_chosen = min(
+        (
+            palette_choice.value
+            for palette_choice in ColourPaletteChoice
+            if len(palette_choice.value) >= len(list_etype)
+        ),
+        key=lambda palette_chosen: len(palette_chosen),
     )
 
     logger.info(
-        f"{palette_choice} palette is chosen based on {len(list_etype)} "
+        f"{palette_chosen} palette is chosen based on {len(list_etype)} "
         "types of edges in total"
     )
 
     # Randomly assign one colour to each edge type
-    list_colour: List[Enum] = random.sample(list(palette_choice), k=len(list_etype))
+    list_colour: List[Enum] = random.sample(list(palette_chosen), k=len(list_etype))
     dict_etype_colour: Dict[str, Enum] = dict(zip(list_etype, list_colour))
 
     logger.info(
@@ -261,3 +267,31 @@ def remove_all_node_attrs_except(  # type: ignore[no-any-unimported]
     )
 
     return nx_g
+
+
+def node_labels_raw_to_node_labels(
+    node_labels_raw: Dict[str, Any],
+    nfeat_as_node_label: NodeFeatureKeyAsLabel,
+    max_node_lab_len: int,
+    null_node_label: str,
+    logger: Logger,
+) -> Dict[str, Any]:
+    if nfeat_as_node_label is NodeFeatureKeyAsLabel.text:
+        logger.info(
+            "Node feature for node labelling set to be "
+            f"{nfeat_as_node_label}. "
+            f"Truncating all characters after {max_node_lab_len}th characters"
+        )
+        node_labels: Dict[str, str] = {}
+        for nid, node_label in node_labels_raw.items():
+            if len(node_label) == 0:
+                node_labels.update({nid: null_node_label})
+            else:
+                node_labels.update({nid: node_label[:max_node_lab_len]})
+        node_labels = {
+            nid: text.strip()[:max_node_lab_len] for nid, text in node_labels.items()
+        }
+    else:
+        node_labels = node_labels_raw
+
+    return node_labels

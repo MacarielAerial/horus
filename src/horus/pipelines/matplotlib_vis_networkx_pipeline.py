@@ -20,6 +20,7 @@ from ..nodes.matplotlib_vis_networkx import (
     layout_and_g_to_pos,
     list_etype_to_dict_etype_colour,
     list_ntype_to_dict_ntype_colour,
+    node_labels_raw_to_node_labels,
     nx_g_to_dict_etype_list_eid,
     nx_g_to_dict_ntype_list_nid,
     remove_all_node_attrs_except,
@@ -49,7 +50,7 @@ def _matplotlib_vis_networkx_pipeline(  # type: ignore[no-any-unimported]
             nx_g=nx_g,
             list_nfeat=[
                 config_vis_networkx.nfeat_ntype,
-                config_vis_networkx.nfeat_text,
+                config_vis_networkx.nfeat_as_node_label.value,
             ],
             logger=logger,
         )
@@ -92,17 +93,16 @@ def _matplotlib_vis_networkx_pipeline(  # type: ignore[no-any-unimported]
     pos = nx.rescale_layout_dict(pos=pos, scale=config_vis_networkx.scale)
 
     # Labels
-    node_labels = nx.get_node_attributes(
+    node_labels_raw = nx.get_node_attributes(
         G=nx_g, name=config_vis_networkx.nfeat_as_node_label.value
     )
-    if config_vis_networkx.nfeat_as_node_label is NodeFeatureKeyAsLabel.text:
-        max_seq_len: int = 25
-        logger.info(
-            "Node feature for node labelling set to be "
-            f"{config_vis_networkx.nfeat_as_node_label}. "
-            f"Truncating all characters after {max_seq_len}th characters"
-        )
-        node_labels = {nid: text[:max_seq_len] for nid, text in node_labels.items()}
+    node_labels = node_labels_raw_to_node_labels(
+        node_labels_raw=node_labels_raw,
+        nfeat_as_node_label=config_vis_networkx.nfeat_as_node_label,
+        max_node_lab_len=config_vis_networkx.max_node_lab_len,
+        null_node_label=config_vis_networkx.null_node_label,
+        logger=logger,
+    )
     edge_labels = nx.get_edge_attributes(G=nx_g, name=config_vis_networkx.efeat_etype)
 
     # Initiate a matplotlib Figure object
@@ -112,6 +112,8 @@ def _matplotlib_vis_networkx_pipeline(  # type: ignore[no-any-unimported]
     #
     # Plot respective objects based on data structures parsed
     #
+
+    logger.info("Drawing elements onto a matplotlib figure...")
 
     # Draw nodes of different types
     for ntype, list_nid in dict_ntype_list_nid.items():
