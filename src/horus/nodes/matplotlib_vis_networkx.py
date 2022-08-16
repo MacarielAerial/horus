@@ -1,4 +1,3 @@
-import random
 from enum import Enum
 from logging import Logger
 from pprint import pformat
@@ -102,10 +101,10 @@ def nx_g_to_dict_etype_list_eid(  # type: ignore[no-any-unimported]
 def list_ntype_to_dict_ntype_colour(
     list_ntype: List[str], logger: Logger
 ) -> Dict[str, HighContrastColourCode]:
-    # Randomly assign one colour to each node type
-    list_colour: List[HighContrastColourCode] = random.sample(
-        list(HighContrastColourCode), k=len(list_ntype)
-    )
+    # Assign one colour to each node type
+    list_colour: List[HighContrastColourCode] = [
+        colour for colour in HighContrastColourCode
+    ]
     dict_ntype_colour: Dict[str, HighContrastColourCode] = dict(
         zip(list_ntype, list_colour)
     )
@@ -136,8 +135,8 @@ def list_etype_to_dict_etype_colour(
         "types of edges in total"
     )
 
-    # Randomly assign one colour to each edge type
-    list_colour: List[Enum] = random.sample(list(palette_chosen), k=len(list_etype))
+    # Assign one colour to each edge type
+    list_colour: List[Enum] = [colour for colour in palette_chosen]
     dict_etype_colour: Dict[str, Enum] = dict(zip(list_etype, list_colour))
 
     logger.info(

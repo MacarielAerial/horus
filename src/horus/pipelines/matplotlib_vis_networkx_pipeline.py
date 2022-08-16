@@ -75,7 +75,7 @@ def _matplotlib_vis_networkx_pipeline(  # type: ignore[no-any-unimported]
         nx_g=nx_g, nfeat_ntype=config_vis_networkx.nfeat_ntype, logger=logger
     )
     dict_ntype_colour = list_ntype_to_dict_ntype_colour(
-        list_ntype=list(dict_ntype_list_nid.keys()), logger=logger
+        list_ntype=sorted(dict_ntype_list_nid), logger=logger
     )
 
     # Edge colour
@@ -83,7 +83,7 @@ def _matplotlib_vis_networkx_pipeline(  # type: ignore[no-any-unimported]
         nx_g=nx_g, efeat_etype=config_vis_networkx.efeat_etype, logger=logger
     )
     dict_etype_colour = list_etype_to_dict_etype_colour(
-        list_etype=list(dict_etype_list_eid.keys()), logger=logger
+        list_etype=sorted(dict_etype_list_eid), logger=logger
     )
 
     # Layout
