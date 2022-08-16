@@ -68,8 +68,8 @@ class RainbowColourCode(Enum):
     ryb_blue: str = "#0141F3"
     vivid_sky_blue: str = "#00D2EA"
     electric_green: str = "#02FB13"
-    middle_yellow: str = "#FEE907"
     spanish_orange: str = "#EF6305"
+    middle_yellow: str = "#FEE907"
     electric_red: str = "#E20806"
 
 
