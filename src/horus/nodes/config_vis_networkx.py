@@ -28,15 +28,16 @@ class ConfigVisNetworkX:
     with_edge_label: bool = True
     font_family: str = "SimHei"
     layout: VisNetworkXLayout = VisNetworkXLayout.graphviz_layout
-    node_size: int = 75  # netowkrx library's default is 300
-    width: float = 0.2  # default line width of edges is 1.0
-    node_label_font_size: int = 1  # networkx library's default is 12
-    edge_label_font_size: int = 1  # networkx library's default is 12
-    figsize: Tuple[int, int] = (84, 84)  # This is already quite large
+    node_size: int = 400  # netowkrx library's default is 300
+    width: float = 0.5  # default line width of edges is 1.0
+    node_label_font_size: int = 3  # networkx library's default is 12
+    edge_label_font_size: int = 3  # networkx library's default is 12
+    figsize: Tuple[int, int] = (216, 216)  # This is already quite large
     dpi: int = 500  # High fidelity setting
     scale: float = 1  # Default is 1
     max_node_lab_len: int = 25
     null_node_label: str = "NULL"
+    facecolour: str = "white"
 
     @classmethod
     def from_nx_g(  # type: ignore[no-any-unimported]
@@ -47,10 +48,18 @@ class ConfigVisNetworkX:
         if n_nodes <= 200:
             return ConfigVisNetworkX(
                 node_size=400,
-                width=0.5,
+                width=1,
                 node_label_font_size=4,
                 edge_label_font_size=2,
                 figsize=(48, 48),
+            )
+        elif n_nodes >= 10000:
+            return ConfigVisNetworkX(
+                node_label_font_size=4,
+                edge_label_font_size=4,
+                node_size=300,
+                width=0.5,
+                figsize=(640, 640),
             )
         else:
             return ConfigVisNetworkX()

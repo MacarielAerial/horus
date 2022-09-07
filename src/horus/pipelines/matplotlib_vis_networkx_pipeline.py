@@ -108,6 +108,9 @@ def _matplotlib_vis_networkx_pipeline(  # type: ignore[no-any-unimported]
     # Initiate a matplotlib Figure object
     fig = plt.figure(figsize=config_vis_networkx.figsize, dpi=config_vis_networkx.dpi)
     ax = fig.add_subplot(111)
+    
+    # Set the face colour
+    ax.set_facecolor(config_vis_networkx.facecolour)
 
     #
     # Plot respective objects based on data structures parsed
