@@ -14,6 +14,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Install GraphViz
+        runs: sudo apt-get install graphviz
+
       - name: Lint and Test code
         run: |
           curl -sSL https://install.python-poetry.org | python3 -
