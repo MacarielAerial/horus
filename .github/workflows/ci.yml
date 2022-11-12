@@ -18,10 +18,9 @@ jobs:
         run: |
           apt-get update -y
           apt-get install -y graphviz-dev
-          export PATH="/usr/bin/neato$PATH"
+          export PATH="/github/home/.local/bin:$PATH"
           neato -V
           curl -sSL https://install.python-poetry.org | python3 -
-          export PATH="/github/home/.local/bin:$PATH"
           poetry --version
           poetry install
           poetry run ./lint.sh
