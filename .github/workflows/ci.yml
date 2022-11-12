@@ -14,13 +14,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Install GraphViz
+      - name: Lint and Test code
         run: |
           apt-get update -y
           apt-get install -y graphviz-dev
-
-      - name: Lint and Test code
-        run: |
           curl -sSL https://install.python-poetry.org | python3 -
           export PATH="/github/home/.local/bin:$PATH"
           poetry --version
