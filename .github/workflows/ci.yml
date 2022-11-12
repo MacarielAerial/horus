@@ -16,9 +16,8 @@ jobs:
 
       - name: Install GraphViz
         run: |
-          add-apt-repository universe
-          apt update
-          apt install graphviz
+          apt-get update -y
+          apt-get install -y graphviz
 
       - name: Lint and Test code
         run: |
