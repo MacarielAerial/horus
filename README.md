@@ -1,3 +1,3 @@
-# Gaia
+# Horus
 
-Template for all Python projects
+Visualise a networkx graph with plotly
